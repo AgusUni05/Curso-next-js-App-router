@@ -5,7 +5,7 @@ import { lusitana } from '@/app/ui/fonts';
 import CardWrapper from '@/app/ui/dashboard/cards';
 import {Suspense} from 'react';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton} from '@/app/ui/skeletons';
-
+export const dynamic = 'force-dynamic';
 export default async function Page() {
  
  
