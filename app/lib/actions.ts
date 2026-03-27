@@ -12,6 +12,9 @@ import { AuthError} from 'next-auth';
     customerId?: string[];
     amount?: string[];
     status?: string[];
+    name?: string[];
+    email?: string[];
+    imageUrl?: string[];
   };
   message?: string | null;
 };
@@ -36,6 +39,18 @@ const FormSchema = z.object({
  
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
+const CreateCustomerSchema = z.object({
+  name: z
+    .string({ required_error: 'Please enter a customer name.' })
+    .min(2, { message: 'Name must be at least 2 characters.' }),
+  email: z
+    .string({ required_error: 'Please enter an email address.' })
+    .email({ message: 'Please enter a valid email.' }),
+  imageUrl: z
+    .string({ required_error: 'Please enter an image URL.' })
+    .url({ message: 'Please provide a valid URL.' }),
+});
 
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form using Zod
@@ -136,4 +151,35 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function createCustomer(prevState: State, formData: FormData) {
+  const validatedFields = CreateCustomerSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    imageUrl: formData.get('imageUrl'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Customer.',
+    };
+  }
+
+  const { name, email, imageUrl } = validatedFields.data;
+
+  try {
+    await sql`
+      INSERT INTO customers (name, email, image_url)
+      VALUES (${name}, ${email}, ${imageUrl})
+    `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Customer.',
+    };
+  }
+
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
 }
