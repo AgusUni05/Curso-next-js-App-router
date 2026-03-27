@@ -7,7 +7,19 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'pfps.gg',
         port: '',
-        pathname: '/**', // Permite cualquier imagen dentro de este dominio
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pfps.gg',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

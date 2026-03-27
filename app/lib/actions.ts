@@ -14,7 +14,6 @@ import { AuthError} from 'next-auth';
     status?: string[];
     name?: string[];
     email?: string[];
-    imageUrl?: string[];
   };
   message?: string | null;
 };
@@ -47,10 +46,12 @@ const CreateCustomerSchema = z.object({
   email: z
     .string({ required_error: 'Please enter an email address.' })
     .email({ message: 'Please enter a valid email.' }),
-  imageUrl: z
-    .string({ required_error: 'Please enter an image URL.' })
-    .url({ message: 'Please provide a valid URL.' }),
 });
+
+function getRandomCustomerImageUrl() {
+  const seed = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/200/200`;
+}
 
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form using Zod
@@ -157,7 +158,6 @@ export async function createCustomer(prevState: State, formData: FormData) {
   const validatedFields = CreateCustomerSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
-    imageUrl: formData.get('imageUrl'),
   });
 
   if (!validatedFields.success) {
@@ -167,7 +167,8 @@ export async function createCustomer(prevState: State, formData: FormData) {
     };
   }
 
-  const { name, email, imageUrl } = validatedFields.data;
+  const { name, email } = validatedFields.data;
+  const imageUrl = getRandomCustomerImageUrl();
 
   try {
     await sql`
